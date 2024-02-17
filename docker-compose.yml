@@ -1,0 +1,23 @@
+version: '3'
+services:
+  postgres:
+    image: postgis/postgis:latest
+    platform: linux/amd64
+    container_name: my_postgres
+    environment:
+      POSTGRES_USER: my_user
+      POSTGRES_PASSWORD: my_password
+      POSTGRES_DB: my_database
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command: >
+      sh -c "
+      /usr/local/bin/docker-entrypoint.sh postgres -c max_wal_size=4GB &&
+      echo 'CREATE EXTENSION IF NOT EXISTS postgis;' | psql -U my_user -d my_database &&
+      echo 'CREATE EXTENSION IF NOT EXISTS pgvector;' | psql -U my_user -d my_database
+      "
+      
+volumes:
+  postgres_data:
