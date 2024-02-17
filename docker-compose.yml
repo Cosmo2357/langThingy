@@ -3,7 +3,7 @@ services:
   postgres:
     image: postgis/postgis:latest
     platform: linux/amd64
-    container_name: my_postgres
+    container_name: lang_postgres
     environment:
       POSTGRES_USER: my_user
       POSTGRES_PASSWORD: my_password

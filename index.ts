@@ -8,7 +8,12 @@ import http from 'http';
 import { HttpError } from './src/helper/HttpError';
 import * as Router from './src/router'
 
+
+
 dotenv.config();
+// use env data 
+const envData =  process.env.OPEN_AI_API
+console.log(envData)
 
 const app: express.Express = express()
 
