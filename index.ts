@@ -7,14 +7,25 @@ import fs from 'fs';
 import http from 'http';
 import { HttpError } from './src/helper/HttpError';
 import * as Router from './src/router'
-
+import { OpenAI , ChatOpenAI} from "@langchain/openai"
 
 
 dotenv.config();
 // use env data 
-const envData =  process.env.OPEN_AI_API
-console.log(envData)
+const openAIApiKey =  process.env.OPEN_AI_API
+console.log(openAIApiKey)
 
+const chatModel = new ChatOpenAI({
+  openAIApiKey: openAIApiKey
+});
+
+const checkApi = async () => {
+ const response = await chatModel.invoke("what is LangSmith?");
+ if (response) {
+   console.log(response)
+ }
+}
+checkApi()
 const app: express.Express = express()
 
 const server: http.Server = http.createServer(app);

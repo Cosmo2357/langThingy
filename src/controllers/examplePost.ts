@@ -11,7 +11,7 @@ console.log('createEntranceData');
     }
 
     try {
-      res.status(201).json({ data });
+      res.status(201).json(data);
     } catch (error) {
       console.error(error);
       res.status(500).send({ error: 'Internal server error' });
