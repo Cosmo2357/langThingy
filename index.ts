@@ -7,7 +7,7 @@ import fs from 'fs';
 import http from 'http';
 import { HttpError } from './src/helper/HttpError';
 import * as Router from './src/router'
-
+import db from './db/db';
 import { OpenAI , ChatOpenAI} from "@langchain/openai"
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { CheerioWebBaseLoader } from "langchain/document_loaders/web/cheerio";
@@ -16,6 +16,7 @@ import { OpenAIEmbeddings } from "@langchain/openai";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
+import pgvector from 'pgvector/pg';
 
 
 dotenv.config();
@@ -48,10 +49,10 @@ const splitDocs = await splitter.splitDocuments(docs);
 console.log(splitDocs.length);
 console.log(splitDocs[0].pageContent.length);
 
-const vectorstore = await MemoryVectorStore.fromDocuments(
+/* const vectorstore = await MemoryVectorStore.fromDocuments(
   splitDocs,
   embeddings
-);
+); */
 }
 //getDocs()
 
@@ -108,8 +109,27 @@ app.use(express.json())
 
 const v1 = "/api/v1"
 
-app.post(`/`, (req, res) => {
-  res.send('Server is running!')
+app.get(`/`, async (req, res) => {
+  const text = 'hello world 123'
+  try {
+    const response = await embeddings.embedDocuments([text]);
+    // OpenAIを使用してテキストからベクトルを生成
+    console.log(response)
+    //const response = await embeddings.embedDocuments([text]);
+
+    //const vector = response.embeddings[0].embedding;
+
+    // ベクトルをデータベースに保存
+    await db('messages').insert({
+
+    });
+
+    res.send({ success: true, message: 'Message and vector saved successfully.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ success: false, message: 'An error occurred.' });
+  }
+
 })
 
 
