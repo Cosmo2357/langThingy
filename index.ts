@@ -7,7 +7,15 @@ import fs from 'fs';
 import http from 'http';
 import { HttpError } from './src/helper/HttpError';
 import * as Router from './src/router'
+
 import { OpenAI , ChatOpenAI} from "@langchain/openai"
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { CheerioWebBaseLoader } from "langchain/document_loaders/web/cheerio";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { OpenAIEmbeddings } from "@langchain/openai";
+import { MemoryVectorStore } from "langchain/vectorstores/memory";
+import { StringOutputParser } from "@langchain/core/output_parsers";
+import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 
 
 dotenv.config();
@@ -19,13 +27,71 @@ const chatModel = new ChatOpenAI({
   openAIApiKey: openAIApiKey
 });
 
-const checkApi = async () => {
- const response = await chatModel.invoke("what is LangSmith?");
+const outputParser = new StringOutputParser();
+
+//const embeddings = new OpenAIEmbeddings();
+const splitter = new RecursiveCharacterTextSplitter();
+const embeddings = new OpenAIEmbeddings({
+  openAIApiKey: openAIApiKey
+});
+const loader = new CheerioWebBaseLoader(
+  "https://docs.smith.langchain.com/user_guide"
+);
+const getDocs = async () => {
+const docs = await loader.load();
+
+console.log(docs.length);
+console.log(docs[0].pageContent.length);
+
+// split the documents into smaller pieces
+const splitDocs = await splitter.splitDocuments(docs);
+console.log(splitDocs.length);
+console.log(splitDocs[0].pageContent.length);
+
+const vectorstore = await MemoryVectorStore.fromDocuments(
+  splitDocs,
+  embeddings
+);
+}
+//getDocs()
+
+const checkApir = async () => {
+ const response = await chatModel.invoke("日本語で話せますか?");
  if (response) {
    console.log(response)
  }
 }
-checkApi()
+//checkApi()
+
+const input = "ここにユーザーの入力や必要な値をセット";
+
+const prompt = ChatPromptTemplate.fromMessages([
+  ["system","You are a world class funny documentation writer who can speak Japanese."],
+  ["user", "{input}"],
+]);
+
+const chain = prompt.pipe(chatModel);
+const checkApi = async () => {
+ const response = await chain.invoke({ input: "眠い"});
+ if (response) {
+   console.log(response)
+ }
+}
+//checkApi()
+
+
+const llmChain = prompt.pipe(chatModel).pipe(outputParser);
+const handleOutputParser = async () => {
+  const response = await  llmChain.invoke({
+  input: "what is LangSmith?",
+});
+
+  if (response) {
+    console.log(response)
+  }
+ }
+ //handleOutputParser()
+
 const app: express.Express = express()
 
 const server: http.Server = http.createServer(app);
