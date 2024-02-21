@@ -1,23 +1,30 @@
-version: '3'
+version: '3.8'
 services:
-  postgres:
-    image: postgis/postgis:latest
-    platform: linux/amd64
-    container_name: lang_postgres
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.0
+    container_name: elasticsearch_nodejs
     environment:
-      POSTGRES_USER: my_user
-      POSTGRES_PASSWORD: my_password
-      POSTGRES_DB: my_database
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
     ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    command: >
-      sh -c "
-      /usr/local/bin/docker-entrypoint.sh postgres -c max_wal_size=4GB &&
-      echo 'CREATE EXTENSION IF NOT EXISTS postgis;' | psql -U my_user -d my_database &&
-      echo 'CREATE EXTENSION IF NOT EXISTS pgvector;' | psql -U my_user -d my_database
-      "
-      
-volumes:
-  postgres_data:
+      - "9200:9200"
+    networks:
+      - elastic
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.9.0
+    container_name: kibana_nodejs
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch_nodejs:9200
+      - ELASTICSEARCH_HOSTS=http://elasticsearch_nodejs:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - elastic
+
+networks:
+  elastic:
+    driver: bridge

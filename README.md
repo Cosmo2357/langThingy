@@ -1,31 +1,19 @@
-### api endpoints
 
-## start command
-```
-npm run dev 
-```
+# ElasticSearch Example
 
-## api endpoints
-```
-GET /api/v1/employees
-GET /api/v1/employees/:id
-POST /api/v1/employees
+## start  
+```bash
+docker-compose up
+npm run dev
 ```
 
-## ngrok
-```
 
-```
+## ElasticSearch
+`http://localhost:9200`
 
-## Knex
-```
-// in db folder
-knex migrate:down
-knex migrate:up
+## Kibana
+`http://localhost:5601`
 
-knex seed:run
-```
 
-## db vector 
 
-https://github.com/pgvector/pgvector-node?tab=readme-ov-file#node-postgres
+
